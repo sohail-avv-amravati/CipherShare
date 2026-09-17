@@ -1,0 +1,15 @@
+# CipherShare .gitignore
+
+.env
+database/*.sqlite
+database/*.db
+storage/uploads/*
+!storage/uploads/.gitkeep
+storage/encrypted/*
+!storage/encrypted/.gitkeep
+storage/temporary/*
+!storage/temporary/.gitkeep
+logs/
+*.log
+.DS_Store
+Thumbs.db
