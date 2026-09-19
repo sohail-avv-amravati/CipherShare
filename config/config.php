@@ -11,7 +11,12 @@ define('STORAGE_TEMP', BASE_DIR . '/storage/temporary');
 
 define('APP_NAME', 'CipherShare');
 define('OWNER_EMAIL', 'ciphershare.support@gmail.com');
-define('SESSION_LIFETIME', 3600); // 1 hour
+define('SESSION_LIFETIME', 86400); // 24 hours
+
+// Detect HTTPS behind reverse proxies (Cloudflare, Render, AWS, etc.)
+if (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https') {
+    $_SERVER['HTTPS'] = 'on';
+}
 
 // Ensure required storage directories exist
 foreach ([STORAGE_UPLOADS, STORAGE_ENCRYPTED, STORAGE_TEMP] as $dir) {
@@ -34,9 +39,16 @@ if (!function_exists('start_secure_session')) {
     function start_secure_session() {
         if (session_status() === PHP_SESSION_NONE) {
             if (!headers_sent()) {
-                ini_set('session.use_strict_mode', 1);
+                ini_set('session.use_strict_mode', 0);
                 ini_set('session.cookie_httponly', 1);
                 ini_set('session.cookie_samesite', 'Lax');
+                ini_set('session.gc_maxlifetime', 86400);
+
+                $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
+                           (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https');
+                if ($isHttps) {
+                    ini_set('session.cookie_secure', 1);
+                }
             }
             @session_start();
         }

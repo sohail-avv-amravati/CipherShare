@@ -12,10 +12,14 @@ class CSRF {
 
     public static function verifyToken(?string $token): bool {
         start_secure_session();
-        if (empty($_SESSION['csrf_token']) || empty($token)) {
+        if (empty($_SESSION['csrf_token'])) {
+            self::generateToken();
             return false;
         }
-        return hash_equals($_SESSION['csrf_token'], $token);
+        if (empty($token)) {
+            return false;
+        }
+        return hash_equals($_SESSION['csrf_token'], trim($token));
     }
 
     public static function getFormField(): string {
