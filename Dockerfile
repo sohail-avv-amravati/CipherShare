@@ -19,13 +19,12 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.
 # Copy project files
 COPY . /var/www/html/
 
-# Create and set permissions for storage and database
+# Create storage and database directories, initialize schema, and set 777 permissions
 RUN mkdir -p /var/www/html/storage/uploads /var/www/html/storage/encrypted /var/www/html/storage/temporary /var/www/html/database \
-    && chown -R www-data:www-data /var/www/html/storage /var/www/html/database
-
-# Initialize SQLite database if missing on boot
-RUN php /var/www/html/scripts/init_db.php && php /var/www/html/scripts/init_owner.php \
-    && chown -R www-data:www-data /var/www/html/database
+    && php /var/www/html/scripts/init_db.php \
+    && php /var/www/html/scripts/init_owner.php \
+    && chown -R www-data:www-data /var/www/html/storage /var/www/html/database \
+    && chmod -R 777 /var/www/html/storage /var/www/html/database
 
 EXPOSE 80
 CMD ["apache2-foreground"]
